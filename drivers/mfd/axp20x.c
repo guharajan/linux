@@ -35,6 +35,7 @@ static const struct regmap_range axp20x_writeable_ranges[] = {
 
 static const struct regmap_range axp20x_volatile_ranges[] = {
 	regmap_reg_range(AXP20X_IRQ1_EN, AXP20X_IRQ5_STATE),
+	regmap_reg_range(AXP20X_ACIN_V_ADC_H, AXP20X_APS_V_L),
 };
 
 static const struct regmap_access_table axp20x_writeable_table = {
@@ -147,6 +148,8 @@ static struct mfd_cell axp20x_cells[] = {
 		.resources		= axp20x_pek_resources,
 	}, {
 		.name			= "axp20x-regulator",
+	}, {
+		.name			= "axp20x-hwmon",
 	},
 };
 

@@ -19,6 +19,12 @@
 	model = "Cubietech Cubieboard2";
 	compatible = "cubietech,cubieboard2", "allwinner,sun7i-a20";
 
+	cpus {
+		cpu0: cpu@0 {
+			cpu0-supply = <&vdd_cpu>;
+		};
+	};
+
 	soc@01c00000 {
 		mmc0: mmc@01c0f000 {
 			pinctrl-names = "default";
@@ -91,6 +97,50 @@
 
 				interrupt-controller;
 				#interrupt-cells = <1>;
+
+				regulators {
+					x-powers,dcdc-freq = <1500>;
+
+					vdd_cpu: dcdc2 {
+						regulator-always-on;
+						regulator-min-microvolt = <1000000>;
+						regulator-max-microvolt = <1450000>;
+						regulator-name = "vdd-cpu";
+					};
+
+					vdd_int_dll: dcdc3 {
+						regulator-always-on;
+						regulator-min-microvolt = <1000000>;
+						regulator-max-microvolt = <1400000>;
+						regulator-name = "vdd-int-dll";
+					};
+
+					vdd_rtc: ldo1 {
+						regulator-always-on;
+						regulator-min-microvolt = <1200000>;
+						regulator-max-microvolt = <1400000>;
+						regulator-name = "vdd-rtc";
+					};
+
+					avcc: ldo2 {
+						regulator-always-on;
+						regulator-min-microvolt = <2700000>;
+						regulator-max-microvolt = <3300000>;
+						regulator-name = "avcc";
+					};
+
+					ldo3 {
+						/* unused */
+					};
+
+					csi1_io_2v8: ldo4 {
+						/*
+						 * listed in schematics but
+						 * not connected
+						 */
+						regulator-name = "csi1-io-2v8";
+					};
+				};
 			};
 		};
 

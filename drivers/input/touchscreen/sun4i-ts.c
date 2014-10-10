@@ -34,6 +34,7 @@
 
 #include <linux/err.h>
 #include <linux/hwmon.h>
+#include <linux/thermal.h>
 #include <linux/init.h>
 #include <linux/input.h>
 #include <linux/interrupt.h>
@@ -107,6 +108,7 @@
 struct sun4i_ts_data {
 	struct device *dev;
 	struct input_dev *input;
+	struct thermal_zone_device *tz;
 	void __iomem *base;
 	unsigned int irq;
 	bool ignore_fifo_data;
@@ -179,6 +181,23 @@ static void sun4i_ts_close(struct input_dev *dev)
 	/* Deactivate all input IRQs */
 	writel(TEMP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
 }
+
+static int get_temp(void *data, long* temp)
+{
+	struct sun4i_ts_data *ts = data;
+
+	/* No temp_data until the first irq */
+	if (ts->temp_data == -1)
+		return -EAGAIN;
+
+	*temp = (ts->temp_data - 1447) * 100;
+
+	return 0;
+}
+
+static struct thermal_zone_of_device_ops sun4i_ts_tz_ops = {
+	.get_temp = get_temp,
+};
 
 static ssize_t show_temp(struct device *dev, struct device_attribute *devattr,
 			 char *buf)
@@ -288,6 +307,11 @@ static int sun4i_ts_probe(struct platform_device *pdev)
 	if (IS_ERR(hwmon))
 		return PTR_ERR(hwmon);
 
+	ts->tz = thermal_zone_of_sensor_register(ts->dev, 0, ts,
+						 &sun4i_ts_tz_ops);
+	if (IS_ERR(ts->tz))
+		ts->tz = NULL;
+
 	writel(TEMP_IRQ_EN(1), ts->base + TP_INT_FIFOC);
 
 	if (ts_attached) {
@@ -309,6 +333,9 @@ static int sun4i_ts_remove(struct platform_device *pdev)
 	/* Explicit unregister to avoid open/close changing the imask later */
 	if (ts->input)
 		input_unregister_device(ts->input);
+
+	if (ts->tz)
+		thermal_zone_of_sensor_unregister(ts->dev, ts->tz);
 
 	/* Deactivate all IRQs */
 	writel(0, ts->base + TP_INT_FIFOC);

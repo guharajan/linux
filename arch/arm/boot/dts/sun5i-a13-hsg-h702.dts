@@ -53,6 +53,12 @@
 	model = "HSG H702";
 	compatible = "hsg,h702", "allwinner,sun5i-a13";
 
+	cpus {
+		cpu0: cpu@0 {
+			cpu0-supply = <&vdd_cpu>;
+		};
+	};
+
 	soc@01c00000 {
 		mmc0: mmc@01c0f000 {
 			pinctrl-names = "default";
@@ -69,7 +75,7 @@
 			 * There doesn't seem to be a GPIO for controlling
 			 * usb1 vbus, despite the fex file saying otherwise.
 			 */
-			usb1_vbus-supply = <&reg_vcc5v0>;
+			usb1_vbus-supply = <&vcc_wifi>;
 			status = "okay";
 		};
 
@@ -107,6 +113,41 @@
 				interrupts = <0>;
 				interrupt-controller;
 				#interrupt-cells = <1>;
+
+				regulators {
+					x-powers,dcdc-freq = <1500>;
+
+					vdd_cpu: dcdc2 {
+						regulator-always-on;
+						regulator-min-microvolt = <1000000>;
+						regulator-max-microvolt = <1500000>;
+					};
+
+					vdd_int: dcdc3 {
+						regulator-always-on;
+					};
+
+					vdd_rtc: ldo1 {
+						regulator-always-on;
+					};
+
+					avcc: ldo2 {
+						regulator-always-on;
+					};
+
+					vcc_wifi: ldo3 {
+						regulator-min-microvolt = <3300000>;
+						regulator-max-microvolt = <3300000>;
+					};
+
+					ldo4 {
+						/* unused */
+					};
+
+					ldo5 {
+						/* unused */
+					};
+				};
 			};
 		};
 

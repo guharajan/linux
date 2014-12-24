@@ -65,10 +65,21 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 
-		cpu@0 {
+		cpu0: cpu@0 {
 			compatible = "arm,cortex-a7";
 			device_type = "cpu";
 			reg = <0>;
+			clocks = <&cpu>;
+			clock-latency = <244144>; /* 8 32k periods */
+			operating-points = <
+				/* kHz    uV */
+				1536000 1500000
+				1248000 1260000
+				1200000 1240000
+				1008000 1140000
+				816000  1040000
+				312000  960000
+				>;
 		};
 
 		cpu@1 {
